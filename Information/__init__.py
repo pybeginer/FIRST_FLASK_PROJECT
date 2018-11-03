@@ -1,0 +1,27 @@
+import redis
+from flask import Flask
+from flask_session import Session
+from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
+
+from config import config_dic
+
+db = SQLAlchemy()
+
+
+def create_app(config_style):
+    app = Flask(__name__)
+    Config = config_dic.get(config_style)
+    app.config.from_object(Config)
+    db.init_app(app)
+    redis_store = redis.StrictRedis(host=Config.REDIS_HOST, port=Config.REDIS_PORT, decode_responses=True)
+    Session(app)
+    CSRFProtect(app)
+
+    from Information.HomePage import blueprint_objt
+    app.register_blueprint(blueprint_objt)
+
+    return app
+
+
+
