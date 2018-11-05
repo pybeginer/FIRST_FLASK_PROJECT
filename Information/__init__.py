@@ -15,7 +15,7 @@ file_log_handler.setFormatter(formatter)
 logging.getLogger().addHandler(file_log_handler)
 
 db = SQLAlchemy()
-redis_store = redis.StrictRedis()
+redis_store = None
 
 
 def create_app(config_style):
@@ -23,11 +23,12 @@ def create_app(config_style):
     Config = config_dic.get(config_style)
     app.config.from_object(Config)
     db.init_app(app)
+    global redis_store
     redis_store = redis.StrictRedis(host=Config.REDIS_HOST, port=Config.REDIS_PORT, decode_responses=True)
     Session(app)
-    CSRFProtect(app)
+    # CSRFProtect(app)
     from Information.passport import passport_blueprint
-    app.register_blueprint(passport_blueprint,)
+    app.register_blueprint(passport_blueprint, url_prefix="/passport")
     from Information.HomePage import blueprint_objt
     app.register_blueprint(blueprint_objt)
 
