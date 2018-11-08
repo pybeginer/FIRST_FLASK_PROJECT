@@ -118,6 +118,29 @@ $(function(){
         }
 
         // 发起登录请求
+        var params = {
+        "mobile": mobile,
+        "password": password,
+    }
+
+    $.ajax({
+        url:"/passport/login",
+        method: "post",
+        headers:{
+            "X-CSRFToken":getCookie("csrf_token1")
+        },
+        data: JSON.stringify(params),
+        contentType: "application/json",
+        success: function (resp) {
+            if (resp.errno == "0") {
+                // 刷新当前界面
+                location.reload();
+            }else {
+                $("#login-password-err").html(resp.errmsg)
+                $("#login-password-err").show()
+            }
+        }
+    })
     })
 
 
@@ -160,6 +183,9 @@ $(function(){
     $.ajax({
         url:"/passport/register",
         type: "post",
+        headers:{
+            "X-CSRFToken":getCookie("csrf_token1")
+        },
         data: JSON.stringify(params),
         contentType: "application/json",
         success: function (resp) {
@@ -221,6 +247,9 @@ function sendSMSCode() {
         url: "/passport/sms_code",
         // 请求方式
         method: "POST",
+        headers:{
+            "X-CSRFToken":getCookie("csrf_token1")
+        },
         // 请求内容
         data: JSON.stringify(params),
         // 请求内容的数据类型
@@ -266,6 +295,7 @@ function sendSMSCode() {
 function logout() {
     $.get("/passport/logout",function (resp) {
         //刷新当前页面
+
         location.reload()
     })
 }

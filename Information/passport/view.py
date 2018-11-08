@@ -1,4 +1,8 @@
 from datetime import datetime
+
+from flask import current_app
+from flask import session
+
 from Information import db
 from flask import request,make_response,jsonify
 from . import passport_blueprint
@@ -96,7 +100,33 @@ def user_login():
     login_phone = request.json.get("mobile")
     login_password = request.json.get("password")
 
-    if not all([login_password, login_phone]):
-        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+    # if not all([login_password, login_phone]):
+    #     return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
 
+    try:
+        user = User.query.filter(User.mobile == login_phone).first()
+    except Exception as err:
+        return current_app.logger.error(err)
+
+    if not user:
+        return jsonify(errno=RET.NODATA, errmsg="请注册")
+
+    if not user.check_password(login_password):
+        return jsonify(errno=RET.PARAMERR, errmsg="密码错误")
+
+    session["user_id"] = user.id
+    session["nick_name"] = user.nick_name
+    session["mobile"] = user.mobile
+
+    user.last_login = datetime.now()
+    db.session.commit()
+    return jsonify(errno=RET.OK, errmsg="登陆成功")
+
+
+@passport_blueprint.route("/logout")
+def user_logout():
+    session.pop("user_id")
+    session.pop("nick_name")
+    session.pop("mobile")
+    return jsonify(errno=RET.OK, errmsg="退出成功")
 
