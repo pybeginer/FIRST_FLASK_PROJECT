@@ -10,5 +10,6 @@ Migrate(app, db)
 manager.add_command("mysql", MigrateCommand)
 
 
+# 入口函数
 if __name__ == '__main__':
     manager.run()
